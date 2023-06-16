@@ -1,0 +1,135 @@
+:root {
+	--color-primary: #00ffbb;
+	--color-accent: #9370db;
+}
+* {
+	box-sizing: border-box;
+}
+body {
+	padding: 12px;
+	margin: 0 auto;
+	font-family: sans-serif;
+}
+header {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	width: fit-content;
+  margin: 0 auto;
+	font-weight: bold;
+}
+header section:first-of-type {
+	grid-column-start: 1;
+  grid-column-end: 3;
+}
+header section div span {
+	display: inline-block;
+}
+header section div span:first-of-type {
+	margin-right: 12px;
+}
+header section:not(:first-of-type) {
+	width: 120px;
+}
+h1 {
+	margin: 0 0 12px 0;
+}
+main {
+	margin: 12px auto;
+	height: calc(100dvh - 320px - 40px - 46px);
+	background-color: rgba(0, 0, 0, 0.25);
+	border-radius: 6px;
+	padding: 12px;
+}
+main pre {
+	position: relative;
+	font-family: sans-serif;
+	width: fit-content;
+	font-size: 20px;
+	line-height: 20px;
+	margin: 0;
+}
+main pre:before {
+	content: "";
+	position: absolute;
+	top: 0;
+	right: -8px;
+	width: 4px;
+	height: 20px;
+	animation: blink 500ms linear infinite alternate;
+}
+footer {
+	display: flex;
+	justify-content: space-between;
+}
+button {
+	height: 40px;
+	border: none;
+	text-transform: uppercase;
+}
+button:not([disabled=true]) {
+	cursor: pointer;
+}
+button[disabled=true] {
+	opacity: 0.5;
+}
+#clear {
+	width: 40px;
+	border-radius: 50%;
+	background-color: unset;
+	transition: background-color 250ms ease-in-out;
+}
+#connect {
+	border-radius: 6px;
+	padding: 12px;
+	background-color: var(--color-primary);
+}
+@keyframes blink {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+@media (prefers-color-scheme: dark) {
+	body {
+		color: whitesmoke;
+		background-color: #121212;
+	}
+	main {
+		background-color: rgba(255, 255, 255, 0.1);
+	}
+	main pre:before {
+		background-color: rgba(255, 255, 255, 0.25);;
+	}
+	button {
+		color: whitesmoke;
+	}
+	button svg {
+		fill: whitesmoke;
+	}
+	#clear:active {
+		background-color: rgba(255, 255, 255, 0.1);
+	}
+}
+@media (prefers-color-scheme: light) {
+	body {
+		color: #333;
+		background-color: whitesmoke;
+	}
+	main {
+		background-color: rgba(0, 0, 0, 0.1);
+	}
+	main pre:before {
+		background-color: #333;
+	}
+	button {
+		color: #333;
+	}
+	button svg {
+		fill: #333;
+	}
+	#clear:active {
+		background-color: rgba(0, 0, 0, 0.1);
+	}
+}
