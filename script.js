@@ -22,9 +22,11 @@ function waitForDevice() {
 	document.querySelector('#connect').onclick = () => {
 		navigator.serial.requestPort()
 		.then(async response => {
-			await reader?.cancel()
-			await reader?.releaseLock()
-			await usbDevice?.close()
+			try {
+				await reader?.cancel()
+				await reader?.releaseLock()
+				await usbDevice?.close()
+			} catch(e){}
 			reader = undefined
 			usbDevice = response
 			deviceInfo = `${usbDevice.getInfo().usbVendorId}__${usbDevice.getInfo().usbProductId}`
@@ -32,6 +34,7 @@ function waitForDevice() {
 			connectToDevice()
 		})
 		.catch(e => {
+			document.querySelector('#connect').removeAttribute('disabled')
 			console.log(e)
 		})
 	}
@@ -45,6 +48,7 @@ function connectToDevice() {
 		read()
 	})
 	.catch(e => {
+		alert('Falha ao conectar.')
 		console.log(e)
 	})
 }
@@ -56,7 +60,6 @@ function read() {
 	.then(response => {
 		if (response.done) return reader.releaseLock()
 		const char = decoder.decode(response.value)
-		console.log(char)
 		document.querySelector('pre').innerHTML += char
 	})
 	.catch(e => {
