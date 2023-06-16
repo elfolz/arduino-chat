@@ -1,7 +1,7 @@
 unsigned long signal_len, t1, t2;
 int inputPin = 2;
 int ledPin = 4;
-int defaultSignalLen = 300;
+int defaultSignalLen = 250;
 String code = "";
 
 void setup() {
@@ -22,7 +22,7 @@ void loop() {
   if (signal_len > 50) {
     code += readio();
   }
-  while ((millis() - t2) < 500) {     
+  while ((millis() - t2) < 500) {
     if (digitalRead(inputPin) == LOW) {
       goto NextDotDash;
     }
