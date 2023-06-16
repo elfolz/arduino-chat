@@ -5,6 +5,9 @@
 * {
 	box-sizing: border-box;
 }
+*:focus {
+	outline: none;
+}
 body {
 	padding: 12px;
 	margin: 0 auto;
@@ -39,22 +42,23 @@ main {
 	background-color: rgba(0, 0, 0, 0.25);
 	border-radius: 6px;
 	padding: 12px;
+	overflow: auto;
 }
-main pre {
+main span {
 	position: relative;
 	font-family: sans-serif;
 	width: fit-content;
+	min-height: 20px;
+	white-space: normal;
 	font-size: 20px;
 	line-height: 20px;
 	margin: 0;
 }
-main pre:before {
-	content: "";
-	position: absolute;
-	top: 0;
-	right: -8px;
+main label {
+	display: inline-block;
 	width: 4px;
 	height: 20px;
+	margin: 0 0 -3px 4px;
 	animation: blink 500ms linear infinite alternate;
 }
 footer {
@@ -75,6 +79,7 @@ button[disabled=true] {
 #clear {
 	width: 40px;
 	border-radius: 50%;
+	overflow: hidden;
 	background-color: unset;
 	transition: background-color 250ms ease-in-out;
 }
@@ -99,7 +104,7 @@ button[disabled=true] {
 	main {
 		background-color: rgba(255, 255, 255, 0.1);
 	}
-	main pre:before {
+	main label {
 		background-color: rgba(255, 255, 255, 0.25);;
 	}
 	button {
@@ -120,7 +125,7 @@ button[disabled=true] {
 	main {
 		background-color: rgba(0, 0, 0, 0.1);
 	}
-	main pre:before {
+	main label {
 		background-color: #333;
 	}
 	button {

@@ -9,12 +9,10 @@ function init() {
 	.then(response => {
 		if (!response?.length) return
 		usbDevice = response[0]
-		deviceInfo = `${usbDevice.getInfo().usbVendorId}__${usbDevice.getInfo().usbProductId}`
-		console.info(`Connected to ${deviceInfo}`)
 		connectToDevice()
 	})
 	document.querySelector('#clear').onclick = () => {
-		document.querySelector('pre').innerHTML = ''
+		document.querySelector('main span').innerHTML = ''
 	}
 }
 
@@ -29,18 +27,18 @@ function waitForDevice() {
 			} catch(e){}
 			reader = undefined
 			usbDevice = response
-			deviceInfo = `${usbDevice.getInfo().usbVendorId}__${usbDevice.getInfo().usbProductId}`
-			console.info(`Connected to ${deviceInfo}`)
 			connectToDevice()
 		})
 		.catch(e => {
 			document.querySelector('#connect').removeAttribute('disabled')
-			console.log(e)
+			console.error(e)
 		})
 	}
 }
 
 function connectToDevice() {
+	deviceInfo = `${usbDevice.getInfo().usbVendorId}__${usbDevice.getInfo().usbProductId}`
+	console.info(`Connected to ${deviceInfo}`)
 	usbDevice.open({baudRate: 9600})
 	.then(() => {
 		document.querySelector('#connect').setAttribute('disabled', 'true')
@@ -49,7 +47,7 @@ function connectToDevice() {
 	})
 	.catch(e => {
 		alert('Falha ao conectar.')
-		console.log(e)
+		console.error(e)
 	})
 }
 
@@ -60,10 +58,10 @@ function read() {
 	.then(response => {
 		if (response.done) return reader.releaseLock()
 		const char = decoder.decode(response.value)
-		document.querySelector('pre').innerHTML += char
+		if (char) document.querySelector('main span').innerHTML += char
 	})
 	.catch(e => {
-		console.log(e)
+		console.error(e)
 	})
 }
 

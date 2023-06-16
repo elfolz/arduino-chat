@@ -1,0 +1,16 @@
+{
+	"start_url": ".",
+	"name": "Arduino Chat",
+	"short_name": "Arduino Chat",
+	"description": "Arduino Chat",
+	"display": "standalone",
+	"orientation": "landscape",
+	"background_color": "#121212",
+	"theme_color": "#00ffbb",
+	"icons": [
+			{ "src": "/img/icons/192x192.png", "sizes": "192x192", "type": "image/png" },
+			{ "src": "/img/icons/512x512.png", "sizes": "512x512", "type": "image/png" },
+			{ "src": "/img/icons/192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+			{ "src": "/img/icons/512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+	]
+}
