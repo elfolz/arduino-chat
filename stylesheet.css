@@ -79,6 +79,7 @@ button:not([disabled=true]) {
 }
 button[disabled=true] {
 	opacity: 0.5;
+	cursor: not-allowed;
 }
 #clear {
 	border-radius: 50%;
