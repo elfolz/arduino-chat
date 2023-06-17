@@ -1,8 +1,8 @@
 {
 	"start_url": ".",
-	"name": "Arduino Chat",
-	"short_name": "Arduino Chat",
-	"description": "Arduino Chat",
+	"name": "Além Chat",
+	"short_name": "Além Chat",
+	"description": "Além Chat",
 	"display": "standalone",
 	"orientation": "landscape",
 	"background_color": "#121212",
