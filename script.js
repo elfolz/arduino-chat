@@ -1,5 +1,9 @@
+const bleServiceUUID = '8452fb34-0d4c-11ee-be56-0242ac120002'
+const bleCharacteristicUUID = '8aaf51c6-0d4c-11ee-be56-0242ac120002'
+
 const decoder = new TextDecoder()
 var usbDevice
+var bleDevice
 var deviceInfo
 var reader
 
@@ -8,8 +12,7 @@ function init() {
 	navigator.serial.getPorts()
 	.then(response => {
 		if (!response?.length) return
-		usbDevice = response[0]
-		connectToDevice()
+		connectToUSBDevice(response[0])
 	})
 	document.querySelector('#clear').onclick = () => {
 		document.querySelector('main span').innerHTML = ''
@@ -17,7 +20,7 @@ function init() {
 }
 
 function waitForDevice() {
-	document.querySelector('#connect').onclick = () => {
+	document.querySelector('#connectUSB').onclick = () => {
 		navigator.serial.requestPort()
 		.then(async response => {
 			try {
@@ -26,24 +29,68 @@ function waitForDevice() {
 				await usbDevice?.close()
 			} catch(e){}
 			reader = undefined
-			usbDevice = response
-			connectToDevice()
+			connectToUSBDevice(response)
 		})
 		.catch(e => {
-			document.querySelector('#connect').removeAttribute('disabled')
+			document.querySelector('#connectUSB').removeAttribute('disabled')
+			alert('Falha ao conectar.')
+			console.error(e)
+		})
+	}
+	document.querySelector('#connectBLE').onclick = () => {
+		navigator.bluetooth.requestDevice({
+			filters: [{services: [bleServiceUUID]}],
+			optionalServices: [bleServiceUUID]
+		})
+		.then(device => {
+			connectToBLE(device)
+		})
+		.catch(e => {
+			document.querySelector('#connectBLE').removeAttribute('disabled')
+			alert('Falha ao conectar.')
 			console.error(e)
 		})
 	}
 }
 
-function connectToDevice() {
-	deviceInfo = `${usbDevice.getInfo().usbVendorId}__${usbDevice.getInfo().usbProductId}`
-	console.info(`Connected to ${deviceInfo}`)
-	usbDevice.open({baudRate: 9600})
+function connectToUSBDevice(device) {
+	usbDevice = device
+	device.open({baudRate: 9600})
 	.then(() => {
-		document.querySelector('#connect').setAttribute('disabled', 'true')
-		reader = usbDevice.readable.getReader()
+		deviceInfo = `${device.getInfo().usbVendorId}__${device.getInfo().usbProductId}`
+		console.info(`Connected to ${deviceInfo}`)
+		document.querySelector('#connectBLE').setAttribute('disabled', 'true')
+		document.querySelector('#connectUSB').setAttribute('disabled', 'true')
+		reader = device.readable.getReader()
 		read()
+	})
+	.catch(e => {
+		usbDevice?.forget()
+		alert('Falha ao conectar.')
+		console.error(e)
+	})
+}
+
+function connectToBLE(device) {
+	bleDevice = device
+	device.gatt.connect(device)
+	.then(server => {
+		return server.getPrimaryService(bleServiceUUID)
+		.then(service => {
+			return service.getCharacteristic(bleCharacteristicUUID)
+			.then(characteristic => {
+				deviceInfo = `${device.name}-${device.id}`
+				console.info(`Connected to ${deviceInfo}`)
+				document.querySelector('#connectBLE').setAttribute('disabled', 'true')
+				document.querySelector('#connectUSB').setAttribute('disabled', 'true')
+				return characteristic.startNotifications()
+				.then(() => {
+					characteristic.addEventListener('characteristicvaluechanged', e => {
+						writeText(e.target.value)
+					})
+				})
+			})
+		})
 	})
 	.catch(e => {
 		alert('Falha ao conectar.')
@@ -57,12 +104,16 @@ function read() {
 	reader.read()
 	.then(response => {
 		if (response.done) return reader.releaseLock()
-		const char = decoder.decode(response.value)
-		if (char) document.querySelector('main span').innerHTML += char
+		writeText(response.value)
 	})
 	.catch(e => {
 		console.error(e)
 	})
+}
+
+function writeText(data) {
+	const text = decoder.decode(data)
+	if (text) document.querySelector('main span').innerHTML += text
 }
 
 document.onreadystatechange = () => {
