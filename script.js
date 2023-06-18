@@ -2,20 +2,23 @@ const bleServiceUUID = '8452fb34-0d4c-11ee-be56-0242ac120002'
 const bleCharacteristicUUID = '8aaf51c6-0d4c-11ee-be56-0242ac120002'
 
 const decoder = new TextDecoder()
+const baudRate = 115200
 var usbDevice
 var bleDevice
 var deviceInfo
 var reader
 
-navigator.serviceWorker?.register('service-worker.js').then(reg => {
-	reg.addEventListener('updatefound', () => {
-		let newWorker = reg.installing
-		newWorker?.addEventListener('statechange', () => {
-			console.log('Update Installed. Restarting...')
-			if (newWorker.state == 'activated') location.reload(true)
+if (location.protocol.startsWith('https')) {
+	navigator.serviceWorker?.register('./service-worker.js').then(reg => {
+		reg.addEventListener('updatefound', () => {
+			let newWorker = reg.installing
+			newWorker?.addEventListener('statechange', () => {
+				console.log('Update Installed. Restarting...')
+				if (newWorker.state == 'activated') location.reload(true)
+			})
 		})
 	})
-})
+}
 
 function init() {
 	waitForDevice()
@@ -65,7 +68,7 @@ function waitForDevice() {
 
 function connectToUSBDevice(device) {
 	usbDevice = device
-	device.open({baudRate: 9600})
+	device.open({baudRate: baudRate})
 	.then(() => {
 		deviceInfo = `${device.getInfo().usbVendorId}__${device.getInfo().usbProductId}`
 		console.info(`Connected to ${deviceInfo}`)
@@ -105,6 +108,10 @@ function connectToBLE(device) {
 	.catch(e => {
 		alert('Falha ao conectar.')
 		console.error(e)
+	})
+	device.addEventListener('gattserverdisconnected', () => {
+		alert('Bluetooth desconectado.')
+		document.querySelector('#connectBLE').removeAttribute('disabled')
 	})
 }
 

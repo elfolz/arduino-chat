@@ -1,38 +1,32 @@
 #include <SoftwareSerial.h>
 
+#define PIN_BUTTON 2
+#define PIN_LED 4
+#define SIGNAL_LEN 250
+
 unsigned long signal_len, t1, t2;
-int inputPin = 2;
-int ledPin = 4;
-int defaultSignalLen = 250;
 String code = "";
-SoftwareSerial BTSerial(0, 1);
 
 void setup() {
 	Serial.begin(9600);
-	BTSerial.begin(115200);
-	pinMode(inputPin, INPUT_PULLUP);
-	pinMode(ledPin, OUTPUT);
+	pinMode(PIN_BUTTON, INPUT_PULLUP);
+	pinMode(PIN_LED, OUTPUT);
 }
 
 void loop() {
-	Serial.println(BTSerial.read());
-	listenToButton();
-}
-
-void listenToButton() {
 NextDotDash:
-	while (digitalRead(inputPin) == HIGH) {}
+	while (digitalRead(PIN_BUTTON) == HIGH) {}
 	t1 = millis();
-	digitalWrite(ledPin, HIGH);
-	while (digitalRead(inputPin) == LOW) {}
+	digitalWrite(PIN_LED, HIGH);
+	while (digitalRead(PIN_BUTTON) == LOW) {}
 	t2 = millis();
-	digitalWrite(ledPin, LOW);
+	digitalWrite(PIN_LED, LOW);
 	signal_len = t2 - t1;
 	if (signal_len > 50) {
 		code += readio();
 	}
 	while ((millis() - t2) < 500) {
-		if (digitalRead(inputPin) == LOW) {
+		if (digitalRead(PIN_BUTTON) == LOW) {
 			goto NextDotDash;
 		}
 	}
@@ -40,18 +34,18 @@ NextDotDash:
 }
 
 char readio() {
-	if (signal_len < defaultSignalLen && signal_len > 50) {
+	if (signal_len < SIGNAL_LEN && signal_len > 50) {
 		return '.';
-	} else if (signal_len > defaultSignalLen) {
+	} else if (signal_len > SIGNAL_LEN) {
 		return '-';
 	}
 }
 
 void convertor() {
 	static String letters[] = {
-			".-",		"-...", "-.-.", "-..",	".",	 "..-.", "--.",	 "....", "..",
-			".---", "-.-",	".-..", "--",		"-.",	 "---",	 ".--.", "--.-", ".-.",
-			"...",	"-",		"..-",	"...-", ".--", "-..-", "-.--", "--..", "E"};
+			".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..",
+			".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.",
+			"...", "-", "..-", "...-", ".--", "-..-", "-.--", "--..", "E"};
 	int i = 0;
 	if (code == ".-.-.-") {
 		Serial.print(".");
