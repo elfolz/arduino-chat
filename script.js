@@ -7,6 +7,9 @@ var usbDevice
 var bleDevice
 var deviceInfo
 var reader
+var dialog
+var buttonUSB
+var buttonBLE
 
 if (location.protocol.startsWith('https')) {
 	navigator.serviceWorker?.register('./service-worker.js').then(reg => {
@@ -21,6 +24,9 @@ if (location.protocol.startsWith('https')) {
 }
 
 function init() {
+	dialog = document.querySelector('dialog')
+	buttonUSB = document.querySelector('#connectUSB')
+	buttonBLE = document.querySelector('#connectBLE')
 	waitForDevice()
 	navigator.serial.getPorts()
 	.then(response => {
@@ -29,11 +35,15 @@ function init() {
 	})
 	document.querySelector('#clear').onclick = () => {
 		document.querySelector('main span').innerHTML = ''
+		openDialog('lorem')
+	}
+	dialog.querySelector('svg').onclick = () => {
+		closeDialog()
 	}
 }
 
 function waitForDevice() {
-	document.querySelector('#connectUSB').onclick = () => {
+	buttonUSB.onclick = () => {
 		navigator.serial.requestPort()
 		.then(async response => {
 			try {
@@ -45,12 +55,12 @@ function waitForDevice() {
 			connectToUSBDevice(response)
 		})
 		.catch(e => {
-			document.querySelector('#connectUSB').removeAttribute('disabled')
-			alert('Falha ao conectar.')
+			buttonUSB.removeAttribute('disabled')
+			openDialog('Falha ao conectar.')
 			console.error(e)
 		})
 	}
-	document.querySelector('#connectBLE').onclick = () => {
+	buttonBLE.onclick = () => {
 		navigator.bluetooth.requestDevice({
 			filters: [{services: [bleServiceUUID]}],
 			optionalServices: [bleServiceUUID]
@@ -59,8 +69,8 @@ function waitForDevice() {
 			connectToBLE(device)
 		})
 		.catch(e => {
-			document.querySelector('#connectBLE').removeAttribute('disabled')
-			alert('Falha ao conectar.')
+			buttonBLE.removeAttribute('disabled')
+			openDialog('Falha ao conectar.')
 			console.error(e)
 		})
 	}
@@ -72,14 +82,14 @@ function connectToUSBDevice(device) {
 	.then(() => {
 		deviceInfo = `${device.getInfo().usbVendorId}__${device.getInfo().usbProductId}`
 		console.info(`Connected to ${deviceInfo}`)
-		document.querySelector('#connectBLE').setAttribute('disabled', 'true')
-		document.querySelector('#connectUSB').setAttribute('disabled', 'true')
+		buttonBLE.setAttribute('disabled', 'true')
+		buttonUSB.setAttribute('disabled', 'true')
 		reader = device.readable.getReader()
 		read()
 	})
 	.catch(e => {
 		usbDevice?.forget()
-		alert('Falha ao conectar.')
+		openDialog('Falha ao conectar.')
 		console.error(e)
 	})
 }
@@ -88,14 +98,18 @@ function connectToBLE(device) {
 	bleDevice = device
 	device.gatt.connect(device)
 	.then(server => {
+		device.addEventListener('gattserverdisconnected', () => {
+			openDialog('Bluetooth desconectado.')
+			buttonBLE.removeAttribute('disabled')
+		})
 		return server.getPrimaryService(bleServiceUUID)
 		.then(service => {
 			return service.getCharacteristic(bleCharacteristicUUID)
 			.then(characteristic => {
 				deviceInfo = `${device.name}-${device.id}`
 				console.info(`Connected to ${deviceInfo}`)
-				document.querySelector('#connectBLE').setAttribute('disabled', 'true')
-				document.querySelector('#connectUSB').setAttribute('disabled', 'true')
+				buttonBLE.setAttribute('disabled', 'true')
+				buttonUSB.setAttribute('disabled', 'true')
 				return characteristic.startNotifications()
 				.then(() => {
 					characteristic.addEventListener('characteristicvaluechanged', e => {
@@ -106,12 +120,8 @@ function connectToBLE(device) {
 		})
 	})
 	.catch(e => {
-		alert('Falha ao conectar.')
+		openDialog('Falha ao conectar.')
 		console.error(e)
-	})
-	device.addEventListener('gattserverdisconnected', () => {
-		alert('Bluetooth desconectado.')
-		document.querySelector('#connectBLE').removeAttribute('disabled')
 	})
 }
 
@@ -131,6 +141,20 @@ function read() {
 function writeText(data) {
 	const text = decoder.decode(data)
 	if (text) document.querySelector('main span').innerHTML += text
+}
+
+function openDialog(text) {
+	dialog.querySelector('span').innerHTML = text
+	dialog.classList.add('open')
+	try { navigator.vibrate(100) } catch(e) {}
+}
+
+function closeDialog() {
+	dialog.classList.add('close')
+	setTimeout(() => {
+		dialog.classList.remove('open')
+		dialog.classList.remove('close')
+	}, 300)
 }
 
 document.onreadystatechange = () => {

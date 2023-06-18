@@ -64,6 +64,28 @@ main label {
 footer {
 	display: flex;
 }
+dialog {
+	display: none;
+	align-items: center;
+	position: fixed;
+	top: calc(env(safe-area-inset-top, 0) + 12px);
+	backdrop-filter: blur(10px);
+	border: none;
+	border-radius: 6px;
+	box-shadow: 0 4px 12px 6px rgba(0, 0, 0, 0.5);
+	opacity: 0;
+}
+dialog svg {
+	margin-left: 12px;
+	cursor: pointer;
+}
+dialog.open {
+	display: flex;
+	animation: fadein 250ms ease-in-out forwards;
+}
+dialog.close {
+	animation: fadein 250ms ease-in-out reverse forwards;
+}
 button {
 	height: 52px;
 	aspect-ratio: 1/1;
@@ -103,6 +125,14 @@ button[disabled=true] {
 		opacity: 1;
 	}
 }
+@keyframes fadein {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
 @media (prefers-color-scheme: dark) {
 	body {
 		color: whitesmoke;
@@ -114,10 +144,14 @@ button[disabled=true] {
 	main label {
 		background-color: rgba(255, 255, 255, 0.25);;
 	}
+	dialog {
+		color: whitesmoke;
+		background-color: rgb(0, 0, 0, 0.5);
+	}
 	button {
 		color: #333;
 	}
-	button svg {
+	button svg, dialog svg {
 		fill: whitesmoke;
 	}
 	#clear:active {
@@ -135,10 +169,14 @@ button[disabled=true] {
 	main label {
 		background-color: #333;
 	}
+	dialog {
+		color: #333;
+		background-color: rgb(255, 255, 255, 0.5);
+	}
 	button {
 		color: #333;
 	}
-	button svg {
+	button svg, dialog svg {
 		fill: #333;
 	}
 	#clear:active {
