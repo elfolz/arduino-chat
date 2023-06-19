@@ -1,7 +1,7 @@
 #include <SoftwareSerial.h>
 
-#define PIN_BUTTON 2
-#define PIN_LED 4
+#define PIN_LED 2
+#define PIN_BUTTON 4
 #define SIGNAL_LEN 250
 
 unsigned long signal_len, t1, t2;
@@ -45,20 +45,17 @@ void convertor() {
 	static String letters[] = {
 			".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..",
 			".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.",
-			"...", "-", "..-", "...-", ".--", "-..-", "-.--", "--..", "E"};
-	int i = 0;
+			"...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."};
 	if (code == ".-.-.-") {
 		Serial.print(".");
 	} else {
-		while (letters[i] != "E") {
+		int i = 0;
+		while (i < 27) {
 			if (letters[i] == code) {
 				Serial.print(char('A' + i));
 				break;
 			}
 			i++;
-		}
-		if (letters[i] == "E") {
-			Serial.println("");
 		}
 	}
 	code = "";

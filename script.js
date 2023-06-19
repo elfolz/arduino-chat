@@ -1,8 +1,8 @@
 const bleServiceUUID = '8452fb34-0d4c-11ee-be56-0242ac120002'
 const bleCharacteristicUUID = '8aaf51c6-0d4c-11ee-be56-0242ac120002'
-
 const decoder = new TextDecoder()
-const baudRate = 115200
+const usbBaudRate = 9600
+
 var usbDevice
 var bleDevice
 var deviceInfo
@@ -27,17 +27,16 @@ function init() {
 	dialog = document.querySelector('dialog')
 	buttonUSB = document.querySelector('#connectUSB')
 	buttonBLE = document.querySelector('#connectBLE')
+	if (/iphone|ipad|macos/i.test(navigator.userAgent)) return openDialog('Este App não funciona em dispositivos Apple 😥', true)
 	waitForDevice()
 	navigator.serial.getPorts()
 	.then(response => {
-		if (!response?.length) return
-		connectToUSBDevice(response[0])
+		if (response?.length) connectUSBDevice(response[0])
 	})
 	document.querySelector('#clear').onclick = () => {
 		document.querySelector('main span').innerHTML = ''
-		openDialog('lorem')
 	}
-	dialog.querySelector('svg').onclick = () => {
+	dialog.querySelector('section svg').onclick = () => {
 		closeDialog()
 	}
 }
@@ -46,17 +45,12 @@ function waitForDevice() {
 	buttonUSB.onclick = () => {
 		navigator.serial.requestPort()
 		.then(async response => {
-			try {
-				await reader?.cancel()
-				await reader?.releaseLock()
-				await usbDevice?.close()
-			} catch(e){}
-			reader = undefined
-			connectToUSBDevice(response)
+			disconnectUSBDevice()
+			connectUSBDevice(response)
 		})
 		.catch(e => {
 			buttonUSB.removeAttribute('disabled')
-			openDialog('Falha ao conectar.')
+			openDialog('Falha ao conectar')
 			console.error(e)
 		})
 	}
@@ -66,50 +60,57 @@ function waitForDevice() {
 			optionalServices: [bleServiceUUID]
 		})
 		.then(device => {
-			connectToBLE(device)
+			connectBLEDevice(device)
 		})
 		.catch(e => {
 			buttonBLE.removeAttribute('disabled')
-			openDialog('Falha ao conectar.')
+			openDialog('Falha ao conectar')
 			console.error(e)
 		})
 	}
 }
 
-function connectToUSBDevice(device) {
+function connectUSBDevice(device) {
 	usbDevice = device
-	device.open({baudRate: baudRate})
+	device.open({baudRate: usbBaudRate})
 	.then(() => {
 		deviceInfo = `${device.getInfo().usbVendorId}__${device.getInfo().usbProductId}`
 		console.info(`Connected to ${deviceInfo}`)
-		buttonBLE.setAttribute('disabled', 'true')
-		buttonUSB.setAttribute('disabled', 'true')
+		disconnectAll()
 		reader = device.readable.getReader()
 		read()
 	})
 	.catch(e => {
 		usbDevice?.forget()
-		openDialog('Falha ao conectar.')
+		openDialog('Falha ao conectar')
 		console.error(e)
 	})
 }
 
-function connectToBLE(device) {
+async function disconnectUSBDevice() {
+	try {
+		await reader?.cancel()
+		await reader?.releaseLock()
+		await usbDevice?.close()
+	} catch(e){}
+	reader = undefined
+}
+
+function connectBLEDevice(device) {
 	bleDevice = device
 	device.gatt.connect(device)
 	.then(server => {
 		device.addEventListener('gattserverdisconnected', () => {
-			openDialog('Bluetooth desconectado.')
+			openDialog('Bluetooth desconectado')
 			buttonBLE.removeAttribute('disabled')
 		})
 		return server.getPrimaryService(bleServiceUUID)
 		.then(service => {
 			return service.getCharacteristic(bleCharacteristicUUID)
 			.then(characteristic => {
-				deviceInfo = `${device.name}-${device.id}`
+				deviceInfo = `${device.name}__${device.id}`
 				console.info(`Connected to ${deviceInfo}`)
-				buttonBLE.setAttribute('disabled', 'true')
-				buttonUSB.setAttribute('disabled', 'true')
+				disconnectAll()
 				return characteristic.startNotifications()
 				.then(() => {
 					characteristic.addEventListener('characteristicvaluechanged', e => {
@@ -120,31 +121,36 @@ function connectToBLE(device) {
 		})
 	})
 	.catch(e => {
-		openDialog('Falha ao conectar.')
+		openDialog('Falha ao conectar')
 		console.error(e)
 	})
 }
 
 function read() {
 	if (!reader) return
-	requestAnimationFrame(read)
 	reader.read()
 	.then(response => {
 		if (response.done) return reader.releaseLock()
 		writeText(response.value)
+		requestAnimationFrame(read)
 	})
 	.catch(e => {
+		openDialog('Falha ao ler dados')
+		disconnectUSBDevice()
+		disconnectAll()
 		console.error(e)
 	})
 }
 
 function writeText(data) {
 	const text = decoder.decode(data)
-	if (text) document.querySelector('main span').innerHTML += text
+	if (text?.length == 1) document.querySelector('main span').innerHTML += text
 }
 
-function openDialog(text) {
-	dialog.querySelector('span').innerHTML = text
+function openDialog(text, disableClose=false) {
+	dialog.querySelector('section span').innerHTML = text
+	if (disableClose) dialog.querySelector('section svg').style.setProperty('display', 'none')
+	else dialog.querySelector('section svg').style.removeProperty('display')
 	dialog.classList.add('open')
 	try { navigator.vibrate(100) } catch(e) {}
 }
@@ -157,11 +163,12 @@ function closeDialog() {
 	}, 300)
 }
 
+function disconnectAll() {
+	buttonBLE.setAttribute('disabled', 'true')
+	buttonUSB.setAttribute('disabled', 'true')
+}
+
 document.onreadystatechange = () => {
 	if (document.readyState == 'complete') init()
 }
-window.onbeforeunload = async () => {
-	await reader?.cancel()
-	await reader?.releaseLock()
-	await usbDevice?.close()
-}
+window.onbeforeunload = async () => disconnectUSBDevice()

@@ -2,7 +2,6 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
- #include <iostream>
 
 #define BLE_SERVER_NAME "Além Chat"
 #define SERVICE_UUID "8452fb34-0d4c-11ee-be56-0242ac120002"
@@ -24,16 +23,15 @@ class HandleServerCallbacks : public BLEServerCallbacks {
 	void onDisconnect(BLEServer *pServer) {
 		deviceConnected = false;
 		delay(500);
-		Serial.println("\nBLE Start Advertising...");
+		Serial.println(std::endl + "BLE Start Advertising...");
 		pServer->getAdvertising()->start();
 	}
 };
 
 void setup() {
-	Serial.begin(115200);
-
 	pinMode(PIN_BUTTON, INPUT_PULLUP);
 	pinMode(PIN_LED, OUTPUT);
+	Serial.begin(115200);
 	
 	Serial.println("BLE Server Starting...");
 	BLEDevice::init(BLE_SERVER_NAME);
@@ -86,7 +84,7 @@ void loop() {
 char readio() {
 	if (signal_len < SIGNAL_LEN && signal_len > 50) {
 		return '.';
-	} else if (signal_len > SIGNAL_LEN) {
+	} else if (signal_len >= SIGNAL_LEN) {
 		return '-';
 	}
 }
@@ -95,13 +93,12 @@ void convertor() {
 	static String letters[] = {
 			".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..",
 			".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.",
-			"...", "-", "..-", "...-", ".--", "-..-", "-.--", "--..", "E"
-  };
-  static std::string alphabet[] = {
-    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
-  };
-	int i = 0;
+			"...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."
+	};
+	static std::string alphabet[] = {
+		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+		"N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+	};
 	if (code == ".-.-.-") {
 		Serial.print(".");
 		if (deviceConnected) {
@@ -109,13 +106,14 @@ void convertor() {
 			pCharacteristic->notify();
 		}
 	} else {
-		while (letters[i] != "E") {
+		int i = 0;
+		while (i < 27) {
 			if (letters[i] == code) {
-        Serial.print(char('A' + i));
+				Serial.print(char('A' + i));
 				if (deviceConnected) {
-          pCharacteristic->setValue(alphabet[i]);
-          pCharacteristic->notify();
-        }
+					pCharacteristic->setValue(alphabet[i]);
+					pCharacteristic->notify();
+				}
 				break;
 			}
 			i++;

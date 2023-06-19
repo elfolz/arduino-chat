@@ -66,16 +66,26 @@ footer {
 }
 dialog {
 	display: none;
+	justify-content: center;
 	align-items: center;
 	position: fixed;
-	top: calc(env(safe-area-inset-top, 0) + 12px);
+	top: 0;
+	left: 0;
+	width: 100vw;
+  height: 100vh;
 	backdrop-filter: blur(10px);
 	border: none;
-	border-radius: 6px;
-	box-shadow: 0 4px 12px 6px rgba(0, 0, 0, 0.5);
 	opacity: 0;
 }
-dialog svg {
+dialog section {
+	display: flex;
+	align-items: center;
+	height: fit-content;
+  padding: 12px;
+	border-radius: 6px;
+	box-shadow: 0 4px 12px 6px rgba(0, 0, 0, 0.5);
+}
+dialog section svg {
 	margin-left: 12px;
 	cursor: pointer;
 }
