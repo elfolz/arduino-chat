@@ -188,8 +188,9 @@ function translate(lang) {
 	})
 	.then(json => {
 		i18n = json
+		document.title = i18n['title']
 		document.querySelectorAll('[i18n]')?.forEach(el => {
-			el.innerHTML = json[el.attributes.i18n.value]
+			el.innerHTML = i18n[el.attributes.i18n.value]
 		})
 	})
 	.catch(e => {

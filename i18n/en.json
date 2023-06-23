@@ -1,5 +1,6 @@
 {
-	"title": "Morse Alphabet",
+	"title": "Beyond Chat",
+	"header": "Morse Alphabet",
 	"incompatibleDevice": "This App won`t work on this device 😥",
 	"connectionFailed": "Connection failed",
 	"readDataFailed": "Read data failed",

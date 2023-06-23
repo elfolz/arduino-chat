@@ -1,5 +1,6 @@
 {
-	"title": "Alfabeto Morse",
+	"title": "Além Chat",
+	"header": "Alfabeto Morse",
 	"incompatibleDevice": "Este App não funciona em neste dispositivo 😥",
 	"connectionFailed": "Falha ao conectar",
 	"readDataFailed": "Falha ao ler dados",
