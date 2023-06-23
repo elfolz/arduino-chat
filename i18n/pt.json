@@ -1,0 +1,7 @@
+{
+	"title": "Alfabeto Morse",
+	"incompatibleDevice": "Este App não funciona em neste dispositivo 😥",
+	"connectionFailed": "Falha ao conectar",
+	"readDataFailed": "Falha ao ler dados",
+	"bluetoothDisconnected": "Bluetooth desconectado"
+}

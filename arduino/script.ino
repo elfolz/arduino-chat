@@ -1,3 +1,7 @@
+/** 
+ * This development uses board ESP32-WROOM
+*/
+
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -6,8 +10,8 @@
 #define BLE_SERVER_NAME "Além Chat"
 #define SERVICE_UUID "8452fb34-0d4c-11ee-be56-0242ac120002"
 #define CHARACTERISTIC_UUID "8aaf51c6-0d4c-11ee-be56-0242ac120002"
-#define PIN_LED 12
-#define PIN_BUTTON 13
+#define PIN_LED 16
+#define PIN_BUTTON 17
 #define SIGNAL_LEN 250
 
 unsigned long signal_len, t1, t2;
@@ -23,7 +27,7 @@ class HandleServerCallbacks : public BLEServerCallbacks {
 	void onDisconnect(BLEServer *pServer) {
 		deviceConnected = false;
 		delay(500);
-		Serial.println(std::endl + "BLE Start Advertising...");
+		//Serial.println("\nBLE Start Advertising...");
 		pServer->getAdvertising()->start();
 	}
 };
@@ -32,16 +36,13 @@ void setup() {
 	pinMode(PIN_BUTTON, INPUT_PULLUP);
 	pinMode(PIN_LED, OUTPUT);
 	Serial.begin(115200);
-	
-	Serial.println("BLE Server Starting...");
+	//Serial.println("BLE Server Starting...");
 	BLEDevice::init(BLE_SERVER_NAME);
-
-	Serial.println("BLE Creating Server...");
+	//Serial.println("BLE Creating Server...");
 	pServer = BLEDevice::createServer();
 	pServer->setCallbacks(new HandleServerCallbacks());
 	BLEService *pService = pServer->createService(SERVICE_UUID);
-
-	Serial.println("BLE Creating Characteristic...");
+	//Serial.println("BLE Creating Characteristic...");
 	pCharacteristic = pService->createCharacteristic(
 			CHARACTERISTIC_UUID,
 			BLECharacteristic::PROPERTY_READ |
@@ -50,15 +51,13 @@ void setup() {
 			BLECharacteristic::PROPERTY_INDICATE
 	);
 	pCharacteristic->addDescriptor(new BLE2902());
-
-	Serial.println("BLE Service Starting...");
+	//Serial.println("BLE Service Starting...");
 	pService->start();
-
-	Serial.println("BLE Creating Advertising...");
+	//Serial.println("BLE Creating Advertising...");
 	BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
 	pAdvertising->addServiceUUID(SERVICE_UUID);
 	BLEDevice::startAdvertising();
-	Serial.println("BLE Waiting for connection...");
+	//Serial.println("BLE Waiting for connection...");
 }
 
 void loop() {
