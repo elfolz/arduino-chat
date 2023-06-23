@@ -37,14 +37,35 @@ h1 {
 	margin: 0 0 12px 0;
 }
 main {
+	display: flex;
 	margin: 12px auto;
 	height: calc(100dvh - 320px - 52px - 46px);
-	background-color: rgba(0, 0, 0, 0.25);
+}
+main img {
+	filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.35));
+	animation: fly 10s linear infinite;
+}
+main section {
+	position: relative;
+	width: 100%;
+	height: fit-content;
 	border-radius: 6px;
 	padding: 12px;
-	overflow: auto;
 }
-main span {
+main section:before {
+	content: "";
+	position: absolute;
+	width: 0;
+	height: 0;
+	border-style: solid;
+}
+main section p {
+	margin: 0;
+	width: 100%;
+	max-height: calc(100dvh - 320px - 52px - 46px - 24px);
+	overflow-y: auto;
+}
+main section p span {
 	position: relative;
 	font-family: sans-serif;
 	width: fit-content;
@@ -54,7 +75,7 @@ main span {
 	line-height: 20px;
 	margin: 0;
 }
-main label {
+main section p label {
 	display: inline-block;
 	width: 4px;
 	height: 20px;
@@ -143,15 +164,47 @@ button[disabled=true] {
 		opacity: 1;
 	}
 }
+@keyframes fly {
+	0% {
+		transform: translate(0, 0);
+	}
+	12.5% {
+		transform: translate(5%, -5%);
+	}
+	25% {
+		transform: translate(0, -10%);
+	}
+	37.5% {
+		transform: translate(-5%, -5%);
+	}
+	50% {
+		transform: translate(0, 0);
+	}
+	62.5% {
+		transform: translate(5%, 5%);
+	}
+	75% {
+		transform: translate(0, 10%);
+	}
+	87.5% {
+		transform: translate(-5%, 5%);
+	}
+	100% {
+		transform: translate(0, 0);
+	}
+}
 @media (prefers-color-scheme: dark) {
 	body {
 		color: whitesmoke;
 		background-color: #121212;
 	}
-	main {
+	main section {
 		background-color: rgba(255, 255, 255, 0.1);
 	}
-	main label {
+	main section:before {
+		border-color: transparent rgba(255, 255, 255, 0.1) transparent transparent;
+	}
+	main section p label {
 		background-color: rgba(255, 255, 255, 0.25);;
 	}
 	dialog {
@@ -173,10 +226,13 @@ button[disabled=true] {
 		color: #333;
 		background-color: whitesmoke;
 	}
-	main {
+	main section {
 		background-color: rgba(0, 0, 0, 0.1);
 	}
-	main label {
+	main section:before {
+		border-color: transparent rgba(0, 0, 0, 0.1) transparent transparent;
+	}
+	main section p label {
 		background-color: #333;
 	}
 	dialog {
@@ -191,5 +247,33 @@ button[disabled=true] {
 	}
 	#clear:active {
 		background-color: rgba(0, 0, 0, 0.1);
+	}
+}
+@media screen and (min-width: 600px) {
+	main img {
+		width: 200px;
+		height: 200px;
+	}
+	main section {
+		min-height: 140px;
+	}
+	main section:before {
+		top: 50px;
+		left: -24px;
+		border-width: 18px 24px 18px 0;
+	}
+}
+@media screen and (max-width: 599px) {
+	main img {
+		width: 120px;
+		height: 120px;
+	}
+	main section {
+		min-height: 80px;
+	}
+	main section:before {
+		top: 25px;
+		left: -18px;
+		border-width: 12px 18px 12px 0;
 	}
 }

@@ -39,7 +39,7 @@ function init() {
 		if (response?.length) connectSerialDevice(response[0])
 	}) */
 	document.querySelector('#clear').onclick = () => {
-		document.querySelector('main span').innerHTML = ''
+		document.querySelector('#content').innerHTML = ''
 	}
 	dialog.querySelector('section svg').onclick = () => {
 		closeDialog()
@@ -151,7 +151,7 @@ function read() {
 
 function writeText(data) {
 	const text = decoder.decode(data)
-	if (text?.length == 1) document.querySelector('main span').innerHTML += text
+	if (text?.length == 1) document.querySelector('#content').innerHTML += text
 }
 
 function openDialog(text, disableClose=false) {
@@ -181,6 +181,7 @@ function disableAll() {
 }
 
 function translate(lang) {
+	if (!location.protocol.startsWith('http')) return
 	fetch(`./i18n/${lang}.json`)
 	.then(response => {
 		return response.json()
