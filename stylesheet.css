@@ -8,16 +8,29 @@
 *:focus {
 	outline: none;
 }
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-thumb {
+	border: none;
+	border-radius: 8px;
+}
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
+	background: transparent;
+}
 body {
 	padding: 12px;
 	margin: 0 auto;
 	font-family: sans-serif;
+	font-size: 20px;
+	line-height: 20px;
 }
 header {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	width: fit-content;
-  margin: 0 auto;
+	margin: 0 auto;
 	font-weight: bold;
 }
 header section:first-of-type {
@@ -62,24 +75,21 @@ main section:before {
 main section p {
 	margin: 0;
 	width: 100%;
+	min-height: calc(1em + 3px);
 	max-height: calc(100dvh - 320px - 52px - 46px - 24px);
 	overflow-y: auto;
 }
 main section p span {
 	position: relative;
 	font-family: sans-serif;
-	width: fit-content;
-	min-height: 20px;
 	white-space: normal;
-	font-size: 20px;
-	line-height: 20px;
 	margin: 0;
 }
 main section p label {
 	display: inline-block;
 	width: 4px;
-	height: 20px;
-	margin: 0 0 -3px 4px;
+	height: 1em;
+	margin: 0 0 -3px 0;
 	animation: blink 500ms linear infinite alternate;
 }
 footer {
@@ -194,6 +204,12 @@ button[disabled=true] {
 	}
 }
 @media (prefers-color-scheme: dark) {
+	::-webkit-scrollbar-thumb {
+		background: rgb(96, 96, 96);
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background: rgb(112, 112, 112);
+	}
 	body {
 		color: whitesmoke;
 		background-color: #121212;
@@ -222,6 +238,12 @@ button[disabled=true] {
 	}
 }
 @media (prefers-color-scheme: light) {
+	::-webkit-scrollbar-thumb {
+		background: whitesmoke;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background: #fff;
+	}
 	body {
 		color: #333;
 		background-color: whitesmoke;

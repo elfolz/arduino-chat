@@ -151,7 +151,9 @@ function read() {
 
 function writeText(data) {
 	const text = decoder.decode(data)
-	if (text?.length == 1) document.querySelector('#content').innerHTML += text
+	if (text?.length != 1) return
+	document.querySelector('#content').innerHTML += text
+	document.querySelector('#caret').scrollIntoView({behavior: 'smooth'})
 }
 
 function openDialog(text, disableClose=false) {

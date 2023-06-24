@@ -10,12 +10,16 @@
 #define BLE_SERVER_NAME "Além Chat"
 #define SERVICE_UUID "8452fb34-0d4c-11ee-be56-0242ac120002"
 #define CHARACTERISTIC_UUID "8aaf51c6-0d4c-11ee-be56-0242ac120002"
-#define PIN_LED 16
-#define PIN_BUTTON 17
-#define SIGNAL_LEN 250
+#define PIN_LED 22
+#define PIN_BUTTON 23
+#define PIN_A_SENSOR 21
 
 unsigned long signal_len, t1, t2;
 String code = "";
+int sensorA = 1;
+int oldSensorA = 1;
+int button = 1;
+int oldButton = 1;
 bool deviceConnected = false;
 BLEServer *pServer = NULL;
 BLECharacteristic *pCharacteristic = NULL;
@@ -35,6 +39,7 @@ class HandleServerCallbacks : public BLEServerCallbacks {
 void setup() {
 	pinMode(PIN_BUTTON, INPUT_PULLUP);
 	pinMode(PIN_LED, OUTPUT);
+	pinMode(PIN_A_SENSOR, INPUT);
 	Serial.begin(115200);
 	//Serial.println("BLE Server Starting...");
 	BLEDevice::init(BLE_SERVER_NAME);
@@ -61,30 +66,41 @@ void setup() {
 }
 
 void loop() {
-	NextDotDash:
-	while (digitalRead(PIN_BUTTON) == HIGH) {}
-	t1 = millis();
-	digitalWrite(PIN_LED, HIGH);
-	while (digitalRead(PIN_BUTTON) == LOW) {}
-	t2 = millis();
-	digitalWrite(PIN_LED, LOW);
-	signal_len = t2 - t1;
-	if (signal_len > 50) {
-		code += readio();
-	}
-	while ((millis() - t2) < 500) {
-		if (digitalRead(PIN_BUTTON) == LOW) {
-			goto NextDotDash;
-		}
-	}
-	convertor();
+	refreshSensor();
+	refreshMorse();
 }
 
-char readio() {
-	if (signal_len < SIGNAL_LEN && signal_len > 50) {
-		return '.';
-	} else if (signal_len >= SIGNAL_LEN) {
-		return '-';
+void refreshSensor() {
+	sensorA = digitalRead(PIN_A_SENSOR);
+	if (oldSensorA != sensorA) {
+		digitalWrite(PIN_LED, !sensorA);
+		if (!sensorA) {
+			Serial.print("A");
+			sendChar("A");
+		}
+		oldSensorA = sensorA;
+	}
+}
+
+void refreshMorse() {
+	button = digitalRead(PIN_BUTTON);
+	if (oldButton != button) {
+		digitalWrite(PIN_LED, !button);
+		if (!button) {
+			t1 = millis();
+		} else {
+			t2 = millis();
+			signal_len = t2 - t1;
+			if (signal_len >= 500) {
+				code += "-";
+			} else if (signal_len >= 50) {
+				code += ".";
+			}
+		}
+		oldButton = button;
+	}
+	if (t2 && (millis() - t2) >= 1000 && button && code) {
+		convertor();
 	}
 }
 
@@ -100,23 +116,24 @@ void convertor() {
 	};
 	if (code == ".-.-.-") {
 		Serial.print(".");
-		if (deviceConnected) {
-			pCharacteristic->setValue(".");
-			pCharacteristic->notify();
-		}
+		sendChar(".");
 	} else {
 		int i = 0;
 		while (i < 27) {
 			if (letters[i] == code) {
 				Serial.print(char('A' + i));
-				if (deviceConnected) {
-					pCharacteristic->setValue(alphabet[i]);
-					pCharacteristic->notify();
-				}
+				sendChar(alphabet[i]);
 				break;
 			}
 			i++;
 		}
 	}
 	code = "";
+}
+
+void sendChar(std::string str) {
+	if (deviceConnected) {
+		pCharacteristic->setValue(str);
+		pCharacteristic->notify();
+	}
 }
